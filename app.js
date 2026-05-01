@@ -18,10 +18,10 @@ const hasSupabaseConfig = Boolean(
     !supabaseConfig.anonKey.includes("YOUR_SUPABASE_ANON_KEY")
 );
 
-let supabase = null;
+let supabaseClient = null;
 if (hasSupabaseConfig) {
   try {
-    supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey);
+    supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey);
   } catch (error) {
     startupError = error?.message || "Supabase client could not be created.";
   }
@@ -87,7 +87,7 @@ init();
 async function init() {
   syncStaticTexts();
 
-  if (!supabase) {
+  if (!supabaseClient) {
     state = getSeedData();
     activeCategoryId = state?.categories?.[0]?.id ?? "";
     renderAll();
@@ -103,7 +103,7 @@ async function init() {
   const rememberedEmail = safeStorageGet(AUTH_HINT_KEY);
   if (rememberedEmail) loginEmailInput.value = rememberedEmail;
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
     if (!session) {
       closeAdminPanel();
     }
@@ -440,13 +440,13 @@ function closeLoginModal() {
 }
 
 async function submitLogin() {
-  if (!supabase) return;
+  if (!supabaseClient) return;
 
   const email = loginEmailInput.value.trim();
   const password = loginPasswordInput.value;
 
   try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
     safeStorageSet(AUTH_HINT_KEY, email);
@@ -622,10 +622,10 @@ async function scheduleSave() {
 }
 
 async function saveMenuNow() {
-  if (!supabase || !state) return;
+  if (!supabaseClient || !state) return;
   if (saveInFlight) await saveInFlight;
 
-  saveInFlight = supabase
+  saveInFlight = supabaseClient
     .from("menu_content")
     .upsert(
       {
@@ -657,12 +657,12 @@ async function saveMenuNow() {
 }
 
 async function fetchMenu() {
-  if (!supabase) {
+  if (!supabaseClient) {
     if (seedMenuData) return seedMenuData;
     throw new Error("Supabase client not configured.");
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("menu_content")
     .select("data")
     .eq("id", MENU_ROW_ID)
@@ -696,8 +696,8 @@ function getSeedData() {
 }
 
 async function getSession() {
-  if (!supabase) return null;
-  const { data, error } = await supabase.auth.getSession();
+  if (!supabaseClient) return null;
+  const { data, error } = await supabaseClient.auth.getSession();
   if (error) return null;
   return data.session;
 }
