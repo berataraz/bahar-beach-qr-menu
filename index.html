@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bahar Beach Food & Drinks</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero__glow"></div>
+        <div class="hero__inner">
+          <div class="hero__toolbar">
+            <div class="language-switcher" aria-label="Dil seçimi">
+              <button id="lang-tr" class="language-button is-active" type="button">TR 🇹🇷</button>
+              <button id="lang-en" class="language-button" type="button">EN 🇬🇧</button>
+            </div>
+          </div>
+          <img class="hero__logo" src="./assets/logo.png" alt="Bahar Beach logosu" />
+          <p class="hero__eyebrow" id="hero-tagline">Food & Drinks</p>
+          <h1>Bahar Beach Food & Drinks</h1>
+          <p class="hero__text" id="hero-note"></p>
+          <div class="hero__actions">
+            <button id="scroll-menu" class="button button--primary" type="button">Menüyü Gör</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="menu-area" id="menu-area">
+          <div class="section-heading">
+            <p class="section-heading__eyebrow" id="menu-slogan">Good Food, Good Drinks, Good Moments</p>
+            <h2 id="menu-heading">Menü</h2>
+            <p id="menu-subheading">Kategoriye dokunarak ürünleri inceleyebilirsiniz.</p>
+          </div>
+
+          <div id="category-tabs" class="category-tabs" aria-label="Menü kategorileri"></div>
+          <div id="menu-content" class="menu-content"></div>
+        </section>
+        <footer class="admin-entry-footer">
+          <p id="admin-bar-note" class="admin-entry-footer__note">
+            Menü yönetimi için yetkili girişi
+          </p>
+          <button id="open-login" class="admin-entry-footer__link" type="button">Panele Giriş</button>
+        </footer>
+      </main>
+    </div>
+
+    <div id="login-modal" class="overlay overlay--hidden">
+      <div class="modal-card">
+        <div class="admin-panel__header">
+          <div>
+            <p class="section-heading__eyebrow" id="login-eyebrow">Yetkili Girişi</p>
+            <h3 id="login-title">Yönetim Paneli</h3>
+          </div>
+          <button id="close-login" class="icon-button" type="button" aria-label="Girişi kapat">x</button>
+        </div>
+
+        <div class="admin-panel__section">
+          <label class="label" for="admin-username">E-posta</label>
+          <input id="admin-username" class="input" type="email" autocomplete="username" />
+        </div>
+
+        <div class="admin-panel__section">
+          <label class="label" for="admin-password">Parola</label>
+          <input id="admin-password" class="input" type="password" autocomplete="current-password" />
+        </div>
+
+        <p id="login-error" class="login-error" hidden></p>
+
+        <div class="admin-panel__actions">
+          <button id="submit-login" class="button button--primary" type="button">Giriş Yap</button>
+        </div>
+      </div>
+    </div>
+
+    <aside id="admin-panel" class="admin-panel admin-panel--hidden">
+      <div class="admin-panel__header">
+        <div>
+          <p class="section-heading__eyebrow" id="panel-eyebrow">Düzenleme</p>
+          <h3 id="panel-title">Menü Yönetimi</h3>
+        </div>
+        <button id="close-admin" class="icon-button" type="button" aria-label="Paneli kapat">x</button>
+      </div>
+      <p id="save-status" class="save-status">Veritabanı bağlantısı hazırlanıyor...</p>
+
+      <div class="admin-panel__section">
+        <label class="label" for="category-select">Kategori Seç</label>
+        <select id="category-select" class="input"></select>
+      </div>
+
+      <div class="admin-panel__actions">
+        <button id="add-category" class="button button--soft" type="button">Kategori Ekle</button>
+        <button id="remove-category" class="button button--danger" type="button">Kategoriyi Sil</button>
+      </div>
+
+      <div class="admin-panel__section">
+        <label class="label" for="venue-phone">Telefon</label>
+        <input id="venue-phone" class="input" type="text" />
+      </div>
+
+      <div class="admin-panel__section">
+        <label class="label" for="venue-note">Alt Not</label>
+        <textarea id="venue-note" class="textarea" rows="3"></textarea>
+      </div>
+
+      <div id="category-editor" class="editor-stack"></div>
+
+      <div class="admin-panel__section">
+        <label class="label" for="json-transfer">JSON Dışarı Al / İçeri Aktar</label>
+        <textarea id="json-transfer" class="textarea textarea--code" rows="8"></textarea>
+      </div>
+
+      <div class="admin-panel__actions">
+        <button id="export-json" class="button button--soft" type="button">JSON Oluştur</button>
+        <button id="import-json" class="button button--primary" type="button">JSON Uygula</button>
+        <button id="reset-data" class="button button--ghost" type="button">Varsayılana Dön</button>
+      </div>
+    </aside>
+
+    <template id="group-editor-template">
+      <article class="editor-card">
+        <div class="editor-card__head">
+          <strong class="editor-card__title"></strong>
+          <button class="icon-button remove-group" type="button" aria-label="Grubu sil">x</button>
+        </div>
+
+        <label class="label">Grup Başlığı TR</label>
+        <input class="input group-title-tr" type="text" />
+
+        <label class="label">Group Title EN</label>
+        <input class="input group-title-en" type="text" />
+
+        <div class="admin-panel__actions">
+          <button class="button button--soft add-item" type="button">Ürün Ekle</button>
+        </div>
+
+        <div class="group-items"></div>
+      </article>
+    </template>
+
+    <template id="item-editor-template">
+      <article class="editor-card editor-card--nested">
+        <div class="editor-card__head">
+          <strong class="editor-card__title"></strong>
+          <button class="icon-button remove-item" type="button" aria-label="Ürünü sil">x</button>
+        </div>
+
+        <label class="label">Ürün Adı TR</label>
+        <input class="input item-name-tr" type="text" />
+
+        <label class="label">Item Name EN</label>
+        <input class="input item-name-en" type="text" />
+
+        <label class="label">Açıklama TR</label>
+        <textarea class="textarea item-description-tr" rows="3"></textarea>
+
+        <label class="label">Description EN</label>
+        <textarea class="textarea item-description-en" rows="3"></textarea>
+
+        <div class="editor-grid">
+          <div>
+            <label class="label">Fiyat</label>
+            <input class="input item-price" type="text" placeholder="Orn. 420 TL" />
+          </div>
+          <div>
+            <label class="label">Etiket</label>
+            <input class="input item-badge" type="text" placeholder="Yeni, Popular" />
+          </div>
+        </div>
+
+        <label class="label">Görsel URL</label>
+        <input class="input item-image" type="text" placeholder="https://..." />
+
+        <label class="label">veya cihazdan görsel seç</label>
+        <input class="input item-file" type="file" accept="image/*" />
+      </article>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

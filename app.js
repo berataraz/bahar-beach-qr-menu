@@ -1,0 +1,688 @@
+const AUTH_HINT_KEY = "bahar-beach-auth-email";
+const MENU_ROW_ID = "primary";
+
+let state = null;
+let currentLanguage = "tr";
+let activeCategoryId = "";
+let saveTimeoutId = null;
+let saveInFlight = null;
+
+const supabaseConfig = window.SUPABASE_CONFIG || {};
+const supabaseReady = Boolean(
+  window.supabase &&
+    supabaseConfig.url &&
+    supabaseConfig.anonKey &&
+    !supabaseConfig.url.includes("YOUR_SUPABASE_URL") &&
+    !supabaseConfig.anonKey.includes("YOUR_SUPABASE_ANON_KEY")
+);
+
+const supabase = supabaseReady
+  ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
+  : null;
+
+const heroTagline = document.getElementById("hero-tagline");
+const heroTitle = document.querySelector(".hero h1");
+const heroNote = document.getElementById("hero-note");
+const menuHeading = document.getElementById("menu-heading");
+const menuSubheading = document.getElementById("menu-subheading");
+const menuSlogan = document.getElementById("menu-slogan");
+const categoryTabs = document.getElementById("category-tabs");
+const menuContent = document.getElementById("menu-content");
+const adminPanel = document.getElementById("admin-panel");
+const loginModal = document.getElementById("login-modal");
+const loginError = document.getElementById("login-error");
+const saveStatus = document.getElementById("save-status");
+const categorySelect = document.getElementById("category-select");
+const categoryEditor = document.getElementById("category-editor");
+const jsonTransfer = document.getElementById("json-transfer");
+const venuePhoneInput = document.getElementById("venue-phone");
+const venueNoteInput = document.getElementById("venue-note");
+const groupTemplate = document.getElementById("group-editor-template");
+const itemTemplate = document.getElementById("item-editor-template");
+const loginEmailInput = document.getElementById("admin-username");
+const loginPasswordInput = document.getElementById("admin-password");
+
+document.getElementById("lang-tr").addEventListener("click", () => switchLanguage("tr"));
+document.getElementById("lang-en").addEventListener("click", () => switchLanguage("en"));
+document.getElementById("scroll-menu").addEventListener("click", () => {
+  document.getElementById("menu-area").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+document.getElementById("open-login").addEventListener("click", openLoginModal);
+document.getElementById("close-login").addEventListener("click", closeLoginModal);
+document.getElementById("submit-login").addEventListener("click", submitLogin);
+document.getElementById("close-admin").addEventListener("click", closeAdminPanel);
+document.getElementById("add-category").addEventListener("click", addCategory);
+document.getElementById("remove-category").addEventListener("click", removeCategory);
+document.getElementById("export-json").addEventListener("click", () => {
+  jsonTransfer.value = JSON.stringify(state, null, 2);
+});
+document.getElementById("import-json").addEventListener("click", importJson);
+document.getElementById("reset-data").addEventListener("click", resetData);
+
+categorySelect.addEventListener("change", (event) => {
+  activeCategoryId = event.target.value;
+  renderMenu();
+  renderAdminEditor();
+});
+
+venuePhoneInput.addEventListener("input", (event) => {
+  state.venue.phone = event.target.value;
+  persistAndRender(false);
+});
+
+venueNoteInput.addEventListener("input", (event) => {
+  state.venue.note[currentLanguage] = event.target.value;
+  persistAndRender(false);
+});
+
+init();
+
+async function init() {
+  syncStaticTexts();
+
+  if (!supabaseReady) {
+    menuContent.innerHTML = `<div class="empty-state">${currentLanguage === "tr"
+      ? "Supabase ayarlarını tamamlamanız gerekiyor."
+      : "You need to complete your Supabase configuration."}</div>`;
+    setSaveStatus(
+      currentLanguage === "tr"
+        ? "Supabase yapılandırması eksik. `supabase-config.js` dosyasını doldurun."
+        : "Supabase config is missing. Fill in `supabase-config.js`.",
+      "error"
+    );
+    return;
+  }
+
+  const rememberedEmail = window.localStorage.getItem(AUTH_HINT_KEY);
+  if (rememberedEmail) loginEmailInput.value = rememberedEmail;
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (!session) {
+      closeAdminPanel();
+    }
+  });
+
+  menuContent.innerHTML = `<div class="empty-state">${currentLanguage === "tr" ? "Menü yükleniyor..." : "Loading menu..."}</div>`;
+  setSaveStatus(
+    currentLanguage === "tr" ? "Supabase verileri yükleniyor..." : "Loading data from Supabase...",
+    "saving"
+  );
+
+  try {
+    state = await fetchMenu();
+    activeCategoryId = state.categories[0]?.id ?? "";
+    renderAll();
+
+    const session = await getSession();
+    setSaveStatus(
+      session
+        ? currentLanguage === "tr"
+          ? "Supabase bağlantısı hazır. Yönetim oturumu açık."
+          : "Supabase connection ready. Admin session is active."
+        : currentLanguage === "tr"
+          ? "Menü Supabase üzerinden yüklendi."
+          : "Menu loaded from Supabase.",
+      "success"
+    );
+  } catch (error) {
+    menuContent.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
+    setSaveStatus(error.message, "error");
+  }
+}
+
+function renderAll() {
+  syncStaticTexts();
+  syncVenueInputs();
+  renderMenu();
+  renderAdminEditor();
+}
+
+function syncStaticTexts() {
+  const copy = currentLanguage === "tr"
+    ? {
+        slogan: "Good Food, Good Drinks, Good Moments",
+        heading: "Menü",
+        subheading: "Kategoriye dokunarak ürünleri inceleyebilirsiniz.",
+        tagline: "Food & Drinks",
+        title: "Bahar Beach Food & Drinks",
+        adminBarNote: "Menü yönetimi için yetkili girişi",
+        loginEyebrow: "Yetkili Girişi",
+        loginTitle: "Yönetim Paneli",
+        openLogin: "Panele Giriş",
+        scroll: "Menüyü Gör",
+        panelEyebrow: "Düzenleme",
+        panelTitle: "Menü Yönetimi",
+        emailLabel: "E-posta",
+      }
+    : {
+        slogan: "Good Food, Good Drinks, Good Moments",
+        heading: "Menu",
+        subheading: "Tap a category to explore the menu.",
+        tagline: "Food & Drinks",
+        title: "Bahar Beach Food & Drinks",
+        adminBarNote: "Authorized sign-in for menu management",
+        loginEyebrow: "Authorized Access",
+        loginTitle: "Admin Panel",
+        openLogin: "Panel Login",
+        scroll: "View Menu",
+        panelEyebrow: "Editing",
+        panelTitle: "Menu Management",
+        emailLabel: "Email",
+      };
+
+  heroTagline.textContent = copy.tagline;
+  heroTitle.textContent = copy.title;
+  menuSlogan.textContent = copy.slogan;
+  menuHeading.textContent = copy.heading;
+  menuSubheading.textContent = copy.subheading;
+  document.getElementById("admin-bar-note").textContent = copy.adminBarNote;
+  document.getElementById("login-eyebrow").textContent = copy.loginEyebrow;
+  document.getElementById("login-title").textContent = copy.loginTitle;
+  document.getElementById("open-login").textContent = copy.openLogin;
+  document.getElementById("scroll-menu").textContent = copy.scroll;
+  document.getElementById("panel-eyebrow").textContent = copy.panelEyebrow;
+  document.getElementById("panel-title").textContent = copy.panelTitle;
+  document.querySelector('label[for="admin-username"]').textContent = copy.emailLabel;
+  document.documentElement.lang = currentLanguage;
+  document.getElementById("lang-tr").classList.toggle("is-active", currentLanguage === "tr");
+  document.getElementById("lang-en").classList.toggle("is-active", currentLanguage === "en");
+}
+
+function renderMenu() {
+  if (!state?.categories?.length) {
+    categoryTabs.innerHTML = "";
+    menuContent.innerHTML = `<div class="empty-state">${currentLanguage === "tr" ? "Menü boş." : "Menu is empty."}</div>`;
+    return;
+  }
+
+  if (!state.categories.some((category) => category.id === activeCategoryId)) {
+    activeCategoryId = state.categories[0].id;
+  }
+
+  categoryTabs.innerHTML = "";
+  state.categories.forEach((category) => {
+    const button = document.createElement("button");
+    button.className = `category-tab ${category.id === activeCategoryId ? "is-active" : ""}`;
+    button.type = "button";
+    button.textContent = textFor(category.title);
+    button.addEventListener("click", () => {
+      activeCategoryId = category.id;
+      renderMenu();
+      renderAdminEditor();
+    });
+    categoryTabs.appendChild(button);
+  });
+
+  const activeCategory = getActiveCategory();
+  const groupsMarkup = activeCategory.groups
+    .map((group) => {
+      const itemsMarkup = group.items
+        .map((item) => {
+          const hasImage = Boolean(item.image);
+          return `
+            <article class="menu-item ${hasImage ? "" : "menu-item--no-image"}">
+              ${hasImage ? `<img class="menu-item__image" src="${item.image}" alt="${escapeHtml(textFor(item.name))}" />` : ""}
+              <div>
+                <div class="menu-item__topline">
+                  <h3 class="menu-item__name">${escapeHtml(textFor(item.name))}</h3>
+                  <span class="menu-item__price">${escapeHtml(item.price || "")}</span>
+                </div>
+                <p class="menu-item__description">${escapeHtml(textFor(item.description))}</p>
+                ${item.badge ? `<span class="menu-item__badge">${escapeHtml(item.badge)}</span>` : ""}
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+
+      return `
+        <article class="group-card">
+          <div class="group-card__header">
+            <div>
+              <p class="section-heading__eyebrow">${escapeHtml(textFor(activeCategory.title))}</p>
+              <h3 class="group-card__title">${escapeHtml(textFor(group.title))}</h3>
+            </div>
+            <span class="category-meta">${group.items.length} ${currentLanguage === "tr" ? "ürün" : "items"}</span>
+          </div>
+          <div class="items-grid">
+            ${itemsMarkup || `<div class="empty-state">${currentLanguage === "tr" ? "Bu grupta henüz ürün yok." : "No items in this group."}</div>`}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  menuContent.innerHTML = `
+    <section class="category-section">
+      <article class="category-card">
+        <div class="category-card__header">
+          <div>
+            <p class="section-heading__eyebrow">${currentLanguage === "tr" ? "Kategori" : "Category"}</p>
+            <h2 class="category-card__title">${escapeHtml(textFor(activeCategory.title))}</h2>
+            <p class="category-card__description">${escapeHtml(textFor(activeCategory.description))}</p>
+          </div>
+          <span class="category-meta">${countItems(activeCategory)} ${currentLanguage === "tr" ? "ürün" : "items"}</span>
+        </div>
+        <div class="category-groups">${groupsMarkup}</div>
+      </article>
+      <div class="footer-note">${escapeHtml(textFor(state.venue.note))} ${escapeHtml(state.venue.phone)}</div>
+    </section>
+  `;
+}
+
+function renderAdminEditor() {
+  if (!state) return;
+
+  categorySelect.innerHTML = "";
+  state.categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category.id;
+    option.textContent = `${category.title.tr} / ${category.title.en}`;
+    if (category.id === activeCategoryId) option.selected = true;
+    categorySelect.appendChild(option);
+  });
+
+  const activeCategory = getActiveCategory();
+  if (!activeCategory) {
+    categoryEditor.innerHTML = "";
+    return;
+  }
+
+  categoryEditor.innerHTML = "";
+  const metaCard = document.createElement("article");
+  metaCard.className = "editor-card";
+  metaCard.innerHTML = `
+    <label class="label">Kategori Başlığı TR</label>
+    <input class="input category-title-tr" type="text" value="${escapeAttribute(activeCategory.title.tr)}" />
+    <label class="label">Category Title EN</label>
+    <input class="input category-title-en" type="text" value="${escapeAttribute(activeCategory.title.en)}" />
+    <label class="label">Kategori Açıklaması TR</label>
+    <textarea class="textarea category-description-tr" rows="3">${escapeHtml(activeCategory.description.tr)}</textarea>
+    <label class="label">Category Description EN</label>
+    <textarea class="textarea category-description-en" rows="3">${escapeHtml(activeCategory.description.en)}</textarea>
+    <div class="admin-panel__actions" style="margin-top: 14px;">
+      <button class="button button--soft add-group" type="button">Grup Ekle</button>
+    </div>
+  `;
+
+  metaCard.querySelector(".category-title-tr").addEventListener("input", (event) => {
+    activeCategory.title.tr = event.target.value;
+    persistAndRender(false);
+  });
+  metaCard.querySelector(".category-title-en").addEventListener("input", (event) => {
+    activeCategory.title.en = event.target.value;
+    persistAndRender(false);
+  });
+  metaCard.querySelector(".category-description-tr").addEventListener("input", (event) => {
+    activeCategory.description.tr = event.target.value;
+    persistAndRender(false);
+  });
+  metaCard.querySelector(".category-description-en").addEventListener("input", (event) => {
+    activeCategory.description.en = event.target.value;
+    persistAndRender(false);
+  });
+  metaCard.querySelector(".add-group").addEventListener("click", () => {
+    activeCategory.groups.push(createGroup({ tr: "Yeni Grup", en: "New Group" }, []));
+    persistAndRender();
+  });
+
+  categoryEditor.appendChild(metaCard);
+
+  activeCategory.groups.forEach((group, groupIndex) => {
+    const groupNode = groupTemplate.content.firstElementChild.cloneNode(true);
+    groupNode.querySelector(".editor-card__title").textContent = `${groupIndex + 1}. ${group.title.tr} / ${group.title.en}`;
+    groupNode.querySelector(".group-title-tr").value = group.title.tr;
+    groupNode.querySelector(".group-title-en").value = group.title.en;
+
+    groupNode.querySelector(".group-title-tr").addEventListener("input", (event) => {
+      group.title.tr = event.target.value;
+      persistAndRender();
+    });
+    groupNode.querySelector(".group-title-en").addEventListener("input", (event) => {
+      group.title.en = event.target.value;
+      persistAndRender();
+    });
+    groupNode.querySelector(".remove-group").addEventListener("click", () => {
+      activeCategory.groups.splice(groupIndex, 1);
+      persistAndRender();
+    });
+    groupNode.querySelector(".add-item").addEventListener("click", () => {
+      group.items.push(item("Yeni Ürün", "New Item", "", ""));
+      persistAndRender();
+    });
+
+    const groupItems = groupNode.querySelector(".group-items");
+    group.items.forEach((menuItem, itemIndex) => {
+      const itemNode = itemTemplate.content.firstElementChild.cloneNode(true);
+      itemNode.querySelector(".editor-card__title").textContent = `${itemIndex + 1}. ${menuItem.name.tr} / ${menuItem.name.en}`;
+      itemNode.querySelector(".item-name-tr").value = menuItem.name.tr;
+      itemNode.querySelector(".item-name-en").value = menuItem.name.en;
+      itemNode.querySelector(".item-description-tr").value = menuItem.description.tr;
+      itemNode.querySelector(".item-description-en").value = menuItem.description.en;
+      itemNode.querySelector(".item-price").value = menuItem.price;
+      itemNode.querySelector(".item-badge").value = menuItem.badge;
+      itemNode.querySelector(".item-image").value = menuItem.image;
+
+      itemNode.querySelector(".item-name-tr").addEventListener("input", (event) => {
+        menuItem.name.tr = event.target.value;
+        persistAndRender();
+      });
+      itemNode.querySelector(".item-name-en").addEventListener("input", (event) => {
+        menuItem.name.en = event.target.value;
+        persistAndRender();
+      });
+      itemNode.querySelector(".item-description-tr").addEventListener("input", (event) => {
+        menuItem.description.tr = event.target.value;
+        persistAndRender(false);
+      });
+      itemNode.querySelector(".item-description-en").addEventListener("input", (event) => {
+        menuItem.description.en = event.target.value;
+        persistAndRender(false);
+      });
+      itemNode.querySelector(".item-price").addEventListener("input", (event) => {
+        menuItem.price = event.target.value;
+        persistAndRender(false);
+      });
+      itemNode.querySelector(".item-badge").addEventListener("input", (event) => {
+        menuItem.badge = event.target.value;
+        persistAndRender(false);
+      });
+      itemNode.querySelector(".item-image").addEventListener("input", (event) => {
+        menuItem.image = event.target.value;
+        persistAndRender(false);
+      });
+      itemNode.querySelector(".item-file").addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        menuItem.image = await fileToDataUrl(file);
+        persistAndRender();
+      });
+      itemNode.querySelector(".remove-item").addEventListener("click", () => {
+        group.items.splice(itemIndex, 1);
+        persistAndRender();
+      });
+
+      groupItems.appendChild(itemNode);
+    });
+
+    categoryEditor.appendChild(groupNode);
+  });
+}
+
+function syncVenueInputs() {
+  if (!state) return;
+  heroNote.textContent = `${textFor(state.venue.note)} ${state.venue.phone}`;
+  venuePhoneInput.value = state.venue.phone;
+  venueNoteInput.value = textFor(state.venue.note);
+}
+
+function switchLanguage(language) {
+  currentLanguage = language;
+  syncStaticTexts();
+  syncVenueInputs();
+  if (state) renderMenu();
+}
+
+function openLoginModal() {
+  loginError.hidden = true;
+  loginModal.classList.remove("overlay--hidden");
+}
+
+function closeLoginModal() {
+  loginModal.classList.add("overlay--hidden");
+}
+
+async function submitLogin() {
+  if (!supabase) return;
+
+  const email = loginEmailInput.value.trim();
+  const password = loginPasswordInput.value;
+
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    window.localStorage.setItem(AUTH_HINT_KEY, email);
+    closeLoginModal();
+    openAdminPanel();
+    setSaveStatus(
+      currentLanguage === "tr" ? "Supabase yönetici oturumu açıldı." : "Supabase admin session started.",
+      "success"
+    );
+  } catch (error) {
+    loginError.textContent = currentLanguage === "tr"
+      ? "E-posta veya parola hatalı."
+      : "Incorrect email or password.";
+    loginError.hidden = false;
+  }
+}
+
+async function openAdminPanel() {
+  const session = await getSession();
+  if (!session) {
+    openLoginModal();
+    return;
+  }
+  renderAdminEditor();
+  adminPanel.classList.remove("admin-panel--hidden");
+}
+
+function closeAdminPanel() {
+  adminPanel.classList.add("admin-panel--hidden");
+}
+
+function addCategory() {
+  const trTitle = window.prompt("Kategori adı (TR):");
+  if (!trTitle) return;
+  const enTitle = window.prompt("Category title (EN):") || trTitle;
+  const id = slugify(`${trTitle}-${enTitle}`);
+  state.categories.push(
+    createCategory(
+      id,
+      { tr: trTitle, en: enTitle },
+      { tr: "Kategori açıklaması", en: "Category description" },
+      [createGroup({ tr: "Yeni Grup", en: "New Group" }, [])]
+    )
+  );
+  activeCategoryId = id;
+  persistAndRender();
+}
+
+function removeCategory() {
+  if (!activeCategoryId) return;
+  const category = getActiveCategory();
+  if (!window.confirm(`${category.title.tr} / ${category.title.en} silinsin mi?`)) return;
+  state.categories = state.categories.filter((entry) => entry.id !== activeCategoryId);
+  activeCategoryId = state.categories[0]?.id ?? "";
+  persistAndRender();
+}
+
+async function importJson() {
+  try {
+    const nextData = JSON.parse(jsonTransfer.value);
+    validateData(nextData);
+    state = nextData;
+    activeCategoryId = state.categories[0]?.id ?? "";
+    renderAll();
+    await saveMenuNow();
+  } catch (error) {
+    window.alert(`JSON okunamadı: ${error.message}`);
+  }
+}
+
+async function resetData() {
+  try {
+    const response = await fetch("./seed_data.json");
+    const seed = await response.json();
+    validateData(seed);
+    state = seed;
+    activeCategoryId = state.categories[0]?.id ?? "";
+    renderAll();
+    await saveMenuNow();
+  } catch (error) {
+    setSaveStatus(error.message, "error");
+  }
+}
+
+function persistAndRender(syncAdmin = true) {
+  syncVenueInputs();
+  renderMenu();
+  if (syncAdmin) renderAdminEditor();
+  scheduleSave();
+}
+
+async function scheduleSave() {
+  const session = await getSession();
+  if (!session) {
+    setSaveStatus(
+      currentLanguage === "tr" ? "Kaydetmek için yönetici girişi gerekli." : "Admin login required to save.",
+      "error"
+    );
+    return;
+  }
+
+  setSaveStatus(
+    currentLanguage === "tr" ? "Değişiklikler Supabase'e kaydediliyor..." : "Saving changes to Supabase...",
+    "saving"
+  );
+
+  window.clearTimeout(saveTimeoutId);
+  saveTimeoutId = window.setTimeout(() => {
+    saveMenuNow().catch(() => {});
+  }, 500);
+}
+
+async function saveMenuNow() {
+  if (!supabase || !state) return;
+  if (saveInFlight) await saveInFlight;
+
+  saveInFlight = supabase
+    .from("menu_content")
+    .update({
+      data: state,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", MENU_ROW_ID)
+    .select("data")
+    .single()
+    .then(({ data, error }) => {
+      if (error) throw error;
+      state = data.data;
+      setSaveStatus(
+        currentLanguage === "tr" ? "Değişiklikler Supabase'e kaydedildi." : "Changes saved to Supabase.",
+        "success"
+      );
+    })
+    .catch((error) => {
+      setSaveStatus(error.message, "error");
+      throw error;
+    })
+    .finally(() => {
+      saveInFlight = null;
+    });
+
+  return saveInFlight;
+}
+
+async function fetchMenu() {
+  if (!supabase) throw new Error("Supabase client not configured.");
+
+  const { data, error } = await supabase
+    .from("menu_content")
+    .select("data")
+    .eq("id", MENU_ROW_ID)
+    .single();
+
+  if (error) {
+    throw new Error(
+      currentLanguage === "tr"
+        ? "Supabase tablosu okunamadı. SQL kurulum adımlarını kontrol edin."
+        : "Could not read the Supabase table. Check the SQL setup steps."
+    );
+  }
+
+  validateData(data.data);
+  return data.data;
+}
+
+async function getSession() {
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.getSession();
+  if (error) return null;
+  return data.session;
+}
+
+function getActiveCategory() {
+  return state.categories.find((category) => category.id === activeCategoryId);
+}
+
+function textFor(value) {
+  if (typeof value === "string") return value;
+  return value?.[currentLanguage] ?? value?.tr ?? "";
+}
+
+function countItems(category) {
+  return category.groups.reduce((total, group) => total + group.items.length, 0);
+}
+
+function createCategory(id, title, description, groups) {
+  return { id, title, description, groups };
+}
+
+function createGroup(title, items, priceHint = "") {
+  return { title, items, priceHint };
+}
+
+function item(trName, enName, trDescription, enDescription, price = "", badge = "", image = "") {
+  return {
+    name: { tr: trName, en: enName },
+    description: { tr: trDescription, en: enDescription },
+    price,
+    badge,
+    image,
+  };
+}
+
+function setSaveStatus(message, tone = "") {
+  saveStatus.textContent = message;
+  saveStatus.classList.remove("is-saving", "is-success", "is-error");
+  if (tone === "saving") saveStatus.classList.add("is-saving");
+  if (tone === "success") saveStatus.classList.add("is-success");
+  if (tone === "error") saveStatus.classList.add("is-error");
+}
+
+function validateData(data) {
+  if (!data || typeof data !== "object") throw new Error("Veri formatı geçersiz.");
+  if (!Array.isArray(data.categories)) throw new Error("Kategori listesi eksik.");
+}
+
+function slugify(value) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replaceAll("`", "&#96;");
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
