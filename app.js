@@ -47,7 +47,7 @@ document.getElementById("lang-en").addEventListener("click", () => switchLanguag
 document.getElementById("scroll-menu").addEventListener("click", () => {
   document.getElementById("menu-area").scrollIntoView({ behavior: "smooth", block: "start" });
 });
-document.getElementById("open-login").addEventListener("click", openLoginModal);
+document.getElementById("open-login").addEventListener("click", handleAdminEntryClick);
 document.getElementById("close-login").addEventListener("click", closeLoginModal);
 document.getElementById("submit-login").addEventListener("click", submitLogin);
 document.getElementById("close-admin").addEventListener("click", closeAdminPanel);
@@ -467,6 +467,15 @@ async function openAdminPanel() {
   adminPanel.classList.remove("admin-panel--hidden");
 }
 
+async function handleAdminEntryClick() {
+  const session = await getSession();
+  if (session) {
+    openAdminPanel();
+    return;
+  }
+  openLoginModal();
+}
+
 function closeAdminPanel() {
   adminPanel.classList.add("admin-panel--hidden");
 }
@@ -558,11 +567,14 @@ async function saveMenuNow() {
 
   saveInFlight = supabase
     .from("menu_content")
-    .update({
-      data: state,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", MENU_ROW_ID)
+    .upsert(
+      {
+        id: MENU_ROW_ID,
+        data: state,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" }
+    )
     .select("data")
     .single()
     .then(({ data, error }) => {
@@ -593,16 +605,33 @@ async function fetchMenu() {
     .eq("id", MENU_ROW_ID)
     .single();
 
-  if (error) {
-    throw new Error(
+  if (error || !data?.data) {
+    const seed = await fetchSeedData();
+    setSaveStatus(
       currentLanguage === "tr"
-        ? "Supabase tablosu okunamadı. SQL kurulum adımlarını kontrol edin."
-        : "Could not read the Supabase table. Check the SQL setup steps."
+        ? "Supabase verisi bulunamadı. Geçici olarak seed veri gösteriliyor."
+        : "Supabase row not found. Showing seed data temporarily.",
+      "error"
     );
+    return seed;
   }
 
   validateData(data.data);
   return data.data;
+}
+
+async function fetchSeedData() {
+  const response = await fetch("./seed_data.json");
+  if (!response.ok) {
+    throw new Error(
+      currentLanguage === "tr"
+        ? "Ne Supabase verisi ne de seed veri okunabildi."
+        : "Neither Supabase data nor seed data could be loaded."
+    );
+  }
+  const seed = await response.json();
+  validateData(seed);
+  return seed;
 }
 
 async function getSession() {
