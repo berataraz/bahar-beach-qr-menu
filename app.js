@@ -1,5 +1,63 @@
 const AUTH_HINT_KEY = "bahar-beach-auth-email";
 const MENU_ROW_ID = "primary";
+const TURKISH_TEXT_REPLACEMENTS = [
+  ["Tas firin", "Taş fırın"],
+  ["tas firin", "taş fırın"],
+  ["tas firinda", "taş fırında"],
+  ["Tas firinda", "Taş fırında"],
+  ["tasiyan", "taşıyan"],
+  ["Feslegen", "Fesleğen"],
+  ["Parcalari", "Parçaları"],
+  ["Karisik", "Karışık"],
+  ["Aci", "Acı"],
+  ["Kirmizi", "Kırmızı"],
+  ["Yesil", "Yeşil"],
+  ["Misir", "Mısır"],
+  ["Vejeteryen", "Vejetaryen"],
+  ["Fume", "Füme"],
+  ["Pastirma", "Pastırma"],
+  ["Sogan", "Soğan"],
+  ["Halkasi", "Halkası"],
+  ["Koftesi", "Köftesi"],
+  ["Sarimsak", "Sarımsak"],
+  ["Zeytinyagi", "Zeytinyağı"],
+  ["Baligi", "Balığı"],
+  ["Seftali", "Şeftali"],
+  ["Cilek", "Çilek"],
+  ["Sarap", "Şarap"],
+  ["Sise", "Şişe"],
+  ["fici", "fıçı"],
+  ["gunleri", "günleri"],
+  ["soguk", "soğuk"],
+  ["tatli", "tatlı"],
+  ["secenekler", "seçenekler"],
+  ["Tum", "Tüm"],
+  ["sandvicler", "sandviçler"],
+  ["Cikolata", "Çikolata"],
+  ["baslangic", "başlangıç"],
+  ["kizartmasi", "kızartması"],
+  ["karisimlari", "karışımları"],
+  ["Közlenmis", "Közlenmiş"],
+  ["Baslangic", "Başlangıç"],
+  ["Paylasim", "Paylaşım"],
+  ["icin", "için"],
+  ["tabaklari", "tabakları"],
+  ["Tabaklari", "Tabakları"],
+  ["Tabagi", "Tabağı"],
+  ["Kizartmasi", "Kızartması"],
+  ["Citir", "Çıtır"],
+  ["Boregi", "Böreği"],
+  ["Salatalik", "Salatalık"],
+  ["Kiyma", "Kıyma"],
+  ["Sandvicler", "Sandviçler"],
+  ["Sandvic", "Sandviç"],
+  ["Kasar", "Kaşar"],
+  ["Tursu", "Turşu"],
+  ["Panuozzolarimiz", "Panuozzolarımız"],
+  ["ozel", "özel"],
+  ["pisirilir", "pişirilir"],
+  ["Balikli", "Balıklı"],
+];
 
 let state = null;
 let currentLanguage = "tr";
@@ -619,6 +677,17 @@ function persistAndRender(syncAdmin = true) {
   );
 }
 
+function scheduleSave() {
+  hasUnsavedChanges = true;
+  updateSaveButtonState();
+  setSaveStatus(
+    currentLanguage === "tr"
+      ? "Kaydedilmemiş değişiklikler var."
+      : "You have unsaved changes.",
+    "saving"
+  );
+}
+
 function refreshCategorySelectOptions() {
   [...categorySelect.options].forEach((option) => {
     const category = state.categories.find((entry) => entry.id === option.value);
@@ -630,13 +699,15 @@ function refreshCategorySelectOptions() {
 async function saveMenuNow() {
   if (!supabaseClient || !state) return;
   if (saveInFlight) await saveInFlight;
+  const normalizedState = normalizeMenuData(state);
+  state = normalizedState;
 
   saveInFlight = supabaseClient
     .from("menu_content")
     .upsert(
       {
         id: MENU_ROW_ID,
-        data: state,
+        data: normalizedState,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "id" }
@@ -645,8 +716,9 @@ async function saveMenuNow() {
     .single()
     .then(({ data, error }) => {
       if (error) throw error;
-      state = data.data;
+      state = normalizeMenuData(data.data);
       hasUnsavedChanges = false;
+      renderAll();
       updateSaveButtonState();
       setSaveStatus(
         currentLanguage === "tr" ? "Değişiklikler Supabase'e kaydedildi." : "Changes saved to Supabase.",
@@ -700,7 +772,7 @@ async function saveMenuManually() {
 
 async function fetchMenu() {
   if (!supabaseClient) {
-    if (seedMenuData) return seedMenuData;
+    if (seedMenuData) return getSeedData();
     throw new Error("Supabase client not configured.");
   }
 
@@ -722,7 +794,7 @@ async function fetchMenu() {
   }
 
   validateData(data.data);
-  return data.data;
+  return normalizeMenuData(data.data);
 }
 
 function getSeedData() {
@@ -734,7 +806,7 @@ function getSeedData() {
     );
   }
   validateData(seedMenuData);
-  return JSON.parse(JSON.stringify(seedMenuData));
+  return normalizeMenuData(JSON.parse(JSON.stringify(seedMenuData)));
 }
 
 async function getSession() {
@@ -798,6 +870,33 @@ function updateSaveButtonState(forceBusy = false) {
 function validateData(data) {
   if (!data || typeof data !== "object") throw new Error("Veri formatı geçersiz.");
   if (!Array.isArray(data.categories)) throw new Error("Kategori listesi eksik.");
+}
+
+function normalizeMenuData(data) {
+  if (Array.isArray(data)) {
+    return data.map((entry) => normalizeMenuData(entry));
+  }
+
+  if (!data || typeof data !== "object") {
+    return data;
+  }
+
+  const normalized = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === "tr" && typeof value === "string") {
+      normalized[key] = normalizeTurkishString(value);
+      return;
+    }
+    normalized[key] = normalizeMenuData(value);
+  });
+  return normalized;
+}
+
+function normalizeTurkishString(value) {
+  return TURKISH_TEXT_REPLACEMENTS.reduce(
+    (text, [from, to]) => text.replaceAll(from, to),
+    value
+  );
 }
 
 function slugify(value) {

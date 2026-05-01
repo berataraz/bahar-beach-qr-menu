@@ -14,7 +14,7 @@
         "en": "Pizzas"
       },
       "description": {
-        "tr": "Tas firin karakteri tasiyan klasik ve ozel pizzalar.",
+        "tr": "Taş fırın karakteri taşıyan klasik ve özel pizzalar.",
         "en": "Classic and signature pizzas with a stone-baked character."
       },
       "groups": [
@@ -30,7 +30,7 @@
                 "en": "Margherita"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Feslegen",
+                "tr": "Mozzarella, Domates Sos, Fesleğen",
                 "en": "Mozzarella, Tomato Sauce, Basil"
               },
               "price": "",
@@ -56,7 +56,7 @@
                 "en": "Chicken Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Tavuk Parcalari, Mantar, Misir, Yesil Biber",
+                "tr": "Mozzarella, Domates Sos, Tavuk Parçaları, Mantar, Mısır, Yeşil Biber",
                 "en": "Mozzarella, Tomato Sauce, Chicken Pieces, Mushrooms, Corn, Green Pepper"
               },
               "price": "",
@@ -65,11 +65,11 @@
             },
             {
               "name": {
-                "tr": "Karisik Pizza",
+                "tr": "Karışık Pizza",
                 "en": "Mixed Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Sucuk, Salam, Mantar, Misir, Zeytin, Yesil Biber",
+                "tr": "Mozzarella, Domates Sos, Sucuk, Salam, Mantar, Mısır, Zeytin, Yeşil Biber",
                 "en": "Mozzarella, Tomato Sauce, Sucuk, Salami, Mushrooms, Corn, Olives, Green Pepper"
               },
               "price": "",
@@ -82,7 +82,7 @@
                 "en": "Mexican Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Sucuk, Jalapeno, Aci Kirmizi Biber",
+                "tr": "Mozzarella, Domates Sos, Sucuk, Jalapeno, Acı Kırmızı Biber",
                 "en": "Mozzarella, Tomato Sauce, Sucuk, Jalapeno, Hot Red Pepper"
               },
               "price": "",
@@ -91,11 +91,11 @@
             },
             {
               "name": {
-                "tr": "Vejeteryen Pizza",
+                "tr": "Vejetaryen Pizza",
                 "en": "Vegetarian Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Mantar, Misir, Yesil Biber, Domates, Feslegen",
+                "tr": "Mozzarella, Domates Sos, Mantar, Mısır, Yeşil Biber, Domates, Fesleğen",
                 "en": "Mozzarella, Tomato Sauce, Mushrooms, Corn, Green Pepper, Tomato, Basil"
               },
               "price": "",
@@ -108,7 +108,7 @@
                 "en": "Aegean Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Beyaz Peynir, Yesil Zeytin, Feslegen",
+                "tr": "Mozzarella, Domates Sos, Beyaz Peynir, Yeşil Zeytin, Fesleğen",
                 "en": "Mozzarella, Tomatoes, Feta Cheese, Green Olives, Basil"
               },
               "price": "",
@@ -117,11 +117,11 @@
             },
             {
               "name": {
-                "tr": "Fume Etli Pizza",
+                "tr": "Füme Etli Pizza",
                 "en": "Smoked Meat Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Fume Et",
+                "tr": "Mozzarella, Domates Sos, Füme Et",
                 "en": "Mozzarella, Smoked Meat"
               },
               "price": "",
@@ -147,7 +147,7 @@
                 "en": "7 Bahar Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Pastirma, Yesil Zeytin, Domates, Kuru Aci Biber, Sogan, Mantar",
+                "tr": "Mozzarella, Domates Sos, Pastırma, Yeşil Zeytin, Domates, Kuru Acı Biber, Soğan, Mantar",
                 "en": "Mozzarella, Pastrami, Green Olives, Tomatoes, Dried Chili Pepper, Onion, Mushrooms"
               },
               "price": "",
@@ -160,7 +160,7 @@
                 "en": "Anatolian Pizza"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Kavurma, Közlenmis Biber, Kuru Domates, Siyah Zeytin, Mantar, Misir",
+                "tr": "Mozzarella, Domates Sos, Kavurma, Közlenmiş Biber, Kuru Domates, Siyah Zeytin, Mantar, Mısır",
                 "en": "Mozzarella, Roasted Meat, Roasted Peppers, Sun-Dried Tomatoes, Black Olives, Mushrooms, Corn"
               },
               "price": "",
@@ -182,7 +182,7 @@
                 "en": "Extra Topping"
               },
               "description": {
-                "tr": "Sucuk, Salam, Sosis, Ispanak, Mantar, Misir, Zeytin, Aci Kirmizi Biber",
+                "tr": "Sucuk, Salam, Sosis, Ispanak, Mantar, Mısır, Zeytin, Acı Kırmızı Biber",
                 "en": "Pepperoni, Salami, Sausage, Spinach, Mushrooms, Corn, Olives, Hot Red Pepper"
               },
               "price": "",
@@ -195,29 +195,29 @@
       ]
     },
     {
-      "id": "baslangiclar-starters",
+      "id": "başlangıçlar-starters",
       "title": {
-        "tr": "Baslangiclar",
+        "tr": "Başlangıçlar",
         "en": "Starters"
       },
       "description": {
-        "tr": "Paylasim icin ideal baslangic tabaklari.",
+        "tr": "Paylaşım için ideal başlangıç tabakları.",
         "en": "Perfect starter plates for sharing."
       },
       "groups": [
         {
           "title": {
-            "tr": "Baslangiclar",
+            "tr": "Başlangıçlar",
             "en": "Starters"
           },
           "items": [
             {
               "name": {
-                "tr": "Bira Tabagi",
+                "tr": "Bira Tabağı",
                 "en": "French Fries Plate"
               },
               "description": {
-                "tr": "Patates Kizartmasi, Sogan Halkasi, Citir Tavuk Parcalari, Sosis, Sigara Boregi",
+                "tr": "Patates Kızartması, Soğan Halkası, Çıtır Tavuk Parçaları, Sosis, Sigara Böreği",
                 "en": "With Parmesan Cheese, Feta Cheese and Cheddar Cheese"
               },
               "price": "",
@@ -226,11 +226,11 @@
             },
             {
               "name": {
-                "tr": "Tavuk Tabagi",
+                "tr": "Tavuk Tabağı",
                 "en": "Chicken Plate"
               },
               "description": {
-                "tr": "Citir Tavuk Parcalari, Patates Kizartmasi",
+                "tr": "Çıtır Tavuk Parçaları, Patates Kızartması",
                 "en": "With French Fries"
               },
               "price": "",
@@ -239,7 +239,7 @@
             },
             {
               "name": {
-                "tr": "Sogan Halkasi",
+                "tr": "Soğan Halkası",
                 "en": "Onion Rings"
               },
               "description": {
@@ -301,7 +301,7 @@
         "en": "Burgers"
       },
       "description": {
-        "tr": "Tum burgerler patates kizartmasi ile servis edilir.",
+        "tr": "Tüm burgerler patates kızartması ile servis edilir.",
         "en": "All burgers are served with French fries."
       },
       "groups": [
@@ -317,7 +317,7 @@
                 "en": "Hamburger"
               },
               "description": {
-                "tr": "Mozzarella, Hamburger Koftesi, Marul, Domates, Tursu, Sogan",
+                "tr": "Mozzarella, Hamburger Köftesi, Marul, Domates, Turşu, Soğan",
                 "en": "Beef Patty, Lettuce, Tomato, Pickles, Onion"
               },
               "price": "",
@@ -330,7 +330,7 @@
                 "en": "Cheeseburger"
               },
               "description": {
-                "tr": "Mozzarella, Cheddar, Hamburger Koftesi, Marul, Domates, Tursu, Sogan",
+                "tr": "Mozzarella, Cheddar, Hamburger Köftesi, Marul, Domates, Turşu, Soğan",
                 "en": "Beef Patty, Cheddar Cheese, Lettuce, Tomato, Pickles, Onion"
               },
               "price": "",
@@ -343,7 +343,7 @@
                 "en": "BBQ Burger"
               },
               "description": {
-                "tr": "Mozzarella, Cheddar, Hamburger Koftesi, Marul, Domates, Sogan Halkasi, BBQ Sos",
+                "tr": "Mozzarella, Cheddar, Hamburger Köftesi, Marul, Domates, Soğan Halkası, BBQ Sos",
                 "en": "Beef Patty, Cheddar Cheese, Lettuce, Tomato, Onion Rings, BBQ Sauce"
               },
               "price": "",
@@ -356,7 +356,7 @@
                 "en": "Mexican Burger"
               },
               "description": {
-                "tr": "Mozzarella, Cheddar, Hamburger Koftesi, Jalapeno, Marul, Domates, Aci Sos",
+                "tr": "Mozzarella, Cheddar, Hamburger Köftesi, Jalapeno, Marul, Domates, Acı Sos",
                 "en": "Beef Patty, Cheddar Cheese, Jalapeno, Lettuce, Tomato, Onion, Pickles, Spicy Sauce"
               },
               "price": "",
@@ -369,7 +369,7 @@
                 "en": "Crispy Chicken Burger"
               },
               "description": {
-                "tr": "Mozzarella, Citir Tavuk, Marul, Domates, Tursu, Mayonez",
+                "tr": "Mozzarella, Çıtır Tavuk, Marul, Domates, Turşu, Mayonez",
                 "en": "Crispy Chicken, Lettuce, Tomato, Pickles, Onion, Mayonnaise"
               },
               "price": "",
@@ -382,7 +382,7 @@
                 "en": "Truffle Burger"
               },
               "description": {
-                "tr": "Mozzarella, Cheddar, Truf Mayonez, Karamelize Sogan, Marul, Mantar",
+                "tr": "Mozzarella, Cheddar, Truf Mayonez, Karamelize Soğan, Marul, Mantar",
                 "en": "Beef Patty, Truffle Mayonnaise, Cheddar Cheese, Arugula, Caramelized Onion"
               },
               "price": "",
@@ -395,7 +395,7 @@
                 "en": "Bahar Burger"
               },
               "description": {
-                "tr": "Mozzarella, Cheddar, Hamburger Koftesi, Karamelize Sogan, Marul, Tursu, Mantar, Bahar Sos",
+                "tr": "Mozzarella, Cheddar, Hamburger Köftesi, Karamelize Soğan, Marul, Turşu, Mantar, Bahar Sos",
                 "en": "Beef Patty, Cheddar Cheese, Caramelized Onion, Lettuce, Pickles, Mushrooms"
               },
               "price": "",
@@ -414,7 +414,7 @@
         "en": "Salads"
       },
       "description": {
-        "tr": "Hafif ve taze secenekler.",
+        "tr": "Hafif ve taze seçenekler.",
         "en": "Light and fresh options."
       },
       "groups": [
@@ -443,7 +443,7 @@
                 "en": "Aegean Salad"
               },
               "description": {
-                "tr": "Marul, Domates, Salatalik, Kirmizi Sogan, Yesil Zeytin, Beyaz Peynir",
+                "tr": "Marul, Domates, Salatalık, Kırmızı Soğan, Yeşil Zeytin, Beyaz Peynir",
                 "en": "Lettuce, Tomatoes, Cucumber, Red Onion, Green Olives, Feta Cheese"
               },
               "price": "",
@@ -452,11 +452,11 @@
             },
             {
               "name": {
-                "tr": "Ton Balikli Salata",
+                "tr": "Ton Balıklı Salata",
                 "en": "Tuna Salad"
               },
               "description": {
-                "tr": "Marul, Ton Baligi, Misir, Kirmizi Sogan, Domates, Salatalik, Zeytin, Limon Sos",
+                "tr": "Marul, Ton Balığı, Mısır, Kırmızı Soğan, Domates, Salatalık, Zeytin, Limon Sos",
                 "en": "Lettuce, Tuna, Corn, Red Onion, Tomatoes, Greens, Lemon Dressing"
               },
               "price": "",
@@ -469,7 +469,7 @@
                 "en": "Garden Salad"
               },
               "description": {
-                "tr": "Mevsim Yesillikleri, Havuç, Domates, Salatalik, Limon Sos",
+                "tr": "Mevsim Yeşillikleri, Havuç, Domates, Salatalık, Limon Sos",
                 "en": "Seasonal Greens, Carrot, Cucumber, Tomatoes, Salad Greens, Lemon Dressing"
               },
               "price": "",
@@ -488,7 +488,7 @@
         "en": "Pastas"
       },
       "description": {
-        "tr": "Kremali ve domates bazli makarna secenekleri.",
+        "tr": "Kremali ve domates bazli makarna seçenekleri.",
         "en": "Creamy and tomato-based pasta selections."
       },
       "groups": [
@@ -517,7 +517,7 @@
                 "en": "Bolognese"
               },
               "description": {
-                "tr": "Fettuccine, Dana Kiyma, Domates Sos, Parmesan Peyniri",
+                "tr": "Fettuccine, Dana Kıyma, Domates Sos, Parmesan Peyniri",
                 "en": "Fettuccine, Minced Beef, Tomato Sauce, Parmesan Cheese"
               },
               "price": "",
@@ -530,7 +530,7 @@
                 "en": "Arrabbiata"
               },
               "description": {
-                "tr": "Penne, Domates Sos, Aci Kirmizi Biber, Sarimsak, Zeytinyagi",
+                "tr": "Penne, Domates Sos, Acı Kırmızı Biber, Sarımsak, Zeytinyağı",
                 "en": "Penne, Tomato Sauce, Hot Red Pepper, Garlic, Olive Oil"
               },
               "price": "",
@@ -556,29 +556,29 @@
       ]
     },
     {
-      "id": "sandvicler-sandwiches",
+      "id": "sandviçler-sandwiches",
       "title": {
-        "tr": "Sandvicler",
+        "tr": "Sandviçler",
         "en": "Sandwiches"
       },
       "description": {
-        "tr": "Pratik ve doyurucu sandvicler.",
+        "tr": "Pratik ve doyurucu sandviçler.",
         "en": "Quick and satisfying sandwiches."
       },
       "groups": [
         {
           "title": {
-            "tr": "Sandvicler",
+            "tr": "Sandviçler",
             "en": "Sandwiches"
           },
           "items": [
             {
               "name": {
-                "tr": "Peynirli Sandvic",
+                "tr": "Peynirli Sandviç",
                 "en": "Cheese Sandwich"
               },
               "description": {
-                "tr": "Beyaz Ekmek, Kasar Peyniri, Domates, Marul, Mayonez",
+                "tr": "Beyaz Ekmek, Kaşar Peyniri, Domates, Marul, Mayonez",
                 "en": "White Bread, Cheese, Lettuce, Tomato, Pickles, Mayonnaise"
               },
               "price": "",
@@ -587,11 +587,11 @@
             },
             {
               "name": {
-                "tr": "Karisik Sandvic",
+                "tr": "Karışık Sandviç",
                 "en": "Mixed Sandwich"
               },
               "description": {
-                "tr": "Beyaz Ekmek, Salam, Kasar Peyniri, Domates, Marul, Tursu, Mayonez",
+                "tr": "Beyaz Ekmek, Salam, Kaşar Peyniri, Domates, Marul, Turşu, Mayonez",
                 "en": "White Bread, Salami, Cheese, Lettuce, Tomato, Pickles, Mayonnaise"
               },
               "price": "",
@@ -600,11 +600,11 @@
             },
             {
               "name": {
-                "tr": "Tavuklu Sandvic",
+                "tr": "Tavuklu Sandviç",
                 "en": "Chicken Sandwich"
               },
               "description": {
-                "tr": "Beyaz Ekmek, Izgara Tavuk, Marul, Domates, Tursu, Mayonez",
+                "tr": "Beyaz Ekmek, Izgara Tavuk, Marul, Domates, Turşu, Mayonez",
                 "en": "White Bread, Grilled Chicken, Lettuce, Tomato, Pickles, Mayonnaise"
               },
               "price": "",
@@ -623,7 +623,7 @@
         "en": "Flatbread Toasts"
       },
       "description": {
-        "tr": "Sahile uygun kolay ve lezzetli tost secenekleri.",
+        "tr": "Sahile uygun kolay ve lezzetli tost seçenekleri.",
         "en": "Comforting and flavorful flatbread toast options."
       },
       "groups": [
@@ -635,11 +635,11 @@
           "items": [
             {
               "name": {
-                "tr": "Karisik Bazlama Tost",
+                "tr": "Karışık Bazlama Tost",
                 "en": "Mixed Flatbread Toast"
               },
               "description": {
-                "tr": "Sucuk, Salam, Kasar Peyniri, Domates, Tursu",
+                "tr": "Sucuk, Salam, Kaşar Peyniri, Domates, Turşu",
                 "en": "Sucuk, Salami, Cheese, Tomatoes, Pickles"
               },
               "price": "",
@@ -648,11 +648,11 @@
             },
             {
               "name": {
-                "tr": "Kasarlı Bazlama Tost",
+                "tr": "Kaşarlı Bazlama Tost",
                 "en": "Cheesy Flatbread Toast"
               },
               "description": {
-                "tr": "Kasar Peyniri",
+                "tr": "Kaşar Peyniri",
                 "en": "Cheddar Cheese, Tomatoes, Pickles"
               },
               "price": "",
@@ -661,11 +661,11 @@
             },
             {
               "name": {
-                "tr": "Vejeteryen Bazlama Tost",
+                "tr": "Vejetaryen Bazlama Tost",
                 "en": "Vegetarian Flatbread Toast"
               },
               "description": {
-                "tr": "Beyaz Peynir, Domates, Yesil Biber, Zeytin",
+                "tr": "Beyaz Peynir, Domates, Yeşil Biber, Zeytin",
                 "en": "Feta Cheese, Tomatoes, Green Pepper, Olives"
               },
               "price": "",
@@ -684,7 +684,7 @@
         "en": "Panuozzos"
       },
       "description": {
-        "tr": "Panuozzolarimiz ozel hamurla tas firinda pisirilir.",
+        "tr": "Panuozzolarımız özel hamurla taş fırında pişirilir.",
         "en": "Our panuozzos are baked in a stone oven with our special dough."
       },
       "groups": [
@@ -696,11 +696,11 @@
           "items": [
             {
               "name": {
-                "tr": "Karisik Panuozzo",
+                "tr": "Karışık Panuozzo",
                 "en": "Mixed Panuozzo"
               },
               "description": {
-                "tr": "Sucuk, Salam, Kasar Peyniri, Mantar, Zeytin, Yesil Biber",
+                "tr": "Sucuk, Salam, Kaşar Peyniri, Mantar, Zeytin, Yeşil Biber",
                 "en": "Sucuk, Salami, Cheese, Mushrooms, Olives"
               },
               "price": "",
@@ -713,7 +713,7 @@
                 "en": "Margherita Panuozzo"
               },
               "description": {
-                "tr": "Mozzarella, Domates Sos, Feslegen",
+                "tr": "Mozzarella, Domates Sos, Fesleğen",
                 "en": "Tomato Sauce, Mozzarella, Basil"
               },
               "price": "",
@@ -739,7 +739,7 @@
                 "en": "Mexican Panuozzo"
               },
               "description": {
-                "tr": "Sucuk, Jalapeno, Aci Kirmizi Biber, Mozzarella",
+                "tr": "Sucuk, Jalapeno, Acı Kırmızı Biber, Mozzarella",
                 "en": "Sucuk, Jalapeno, Hot Red Pepper, Mozzarella"
               },
               "price": "",
@@ -748,11 +748,11 @@
             },
             {
               "name": {
-                "tr": "Ton Balikli Panuozzo",
+                "tr": "Ton Balıklı Panuozzo",
                 "en": "Tuna Panuozzo"
               },
               "description": {
-                "tr": "Ton Baligi, Misir, Kirmizi Sogan, Mozzarella",
+                "tr": "Ton Balığı, Mısır, Kırmızı Soğan, Mozzarella",
                 "en": "Tuna, Corn, Red Onion, Mozzarella"
               },
               "price": "",
@@ -761,11 +761,11 @@
             },
             {
               "name": {
-                "tr": "Fume Etli Panuozzo",
+                "tr": "Füme Etli Panuozzo",
                 "en": "Smoked Meat Panuozzo"
               },
               "description": {
-                "tr": "Fume Et, Mozzarella, Roka, Parmesan",
+                "tr": "Füme Et, Mozzarella, Roka, Parmesan",
                 "en": "Smoked Meat, Mozzarella, Arugula, Parmesan"
               },
               "price": "",
@@ -930,7 +930,7 @@
                 "en": "Fruit Juice"
               },
               "description": {
-                "tr": "Seftali, Cilek, Muz, Ananas, Portakal, Karisik",
+                "tr": "Şeftali, Çilek, Muz, Ananas, Portakal, Karışık",
                 "en": "Peach, Cherry, Apple, Pineapple, Orange, Mixed"
               },
               "price": "",
@@ -975,7 +975,7 @@
         "en": "Frozen and Milkshake"
       },
       "description": {
-        "tr": "Yaz gunleri icin soguk ve tatli secenekler.",
+        "tr": "Yaz günleri için soğuk ve tatlı seçenekler.",
         "en": "Cold and sweet choices for summer days."
       },
       "groups": [
@@ -1013,7 +1013,7 @@
             },
             {
               "name": {
-                "tr": "Cilek",
+                "tr": "Çilek",
                 "en": "Strawberry"
               },
               "description": {
@@ -1035,7 +1035,7 @@
           "items": [
             {
               "name": {
-                "tr": "Cikolata",
+                "tr": "Çikolata",
                 "en": "Chocolate"
               },
               "description": {
@@ -1074,7 +1074,7 @@
             },
             {
               "name": {
-                "tr": "Cilek",
+                "tr": "Çilek",
                 "en": "Strawberry"
               },
               "description": {
@@ -1110,7 +1110,7 @@
         "en": "Beers"
       },
       "description": {
-        "tr": "Sise ve fici secenekleri.",
+        "tr": "Şişe ve fıçı seçenekleri.",
         "en": "Bottle and draft selections."
       },
       "groups": [
@@ -1310,23 +1310,23 @@
     {
       "id": "wines-long-drinks",
       "title": {
-        "tr": "Saraplar ve Long Drinks",
+        "tr": "Şaraplar ve Long Drinks",
         "en": "Wines and Long Drinks"
       },
       "description": {
-        "tr": "Sarap ve klasik bar karisimlari.",
+        "tr": "Şarap ve klasik bar karışımları.",
         "en": "Wine options and classic bar mixes."
       },
       "groups": [
         {
           "title": {
-            "tr": "Saraplar",
+            "tr": "Şaraplar",
             "en": "Wines"
           },
           "items": [
             {
               "name": {
-                "tr": "Beyaz Sarap",
+                "tr": "Beyaz Şarap",
                 "en": "White Wine"
               },
               "description": {
@@ -1339,7 +1339,7 @@
             },
             {
               "name": {
-                "tr": "Kirmizi Sarap",
+                "tr": "Kırmızı Şarap",
                 "en": "Red Wine"
               },
               "description": {
@@ -1352,7 +1352,7 @@
             },
             {
               "name": {
-                "tr": "Rose Sarap",
+                "tr": "Rose Şarap",
                 "en": "Rose Wine"
               },
               "description": {
