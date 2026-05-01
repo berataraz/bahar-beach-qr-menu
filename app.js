@@ -100,7 +100,7 @@ async function init() {
     return;
   }
 
-  const rememberedEmail = window.localStorage.getItem(AUTH_HINT_KEY);
+  const rememberedEmail = safeStorageGet(AUTH_HINT_KEY);
   if (rememberedEmail) loginEmailInput.value = rememberedEmail;
 
   supabase.auth.onAuthStateChange((_event, session) => {
@@ -449,7 +449,7 @@ async function submitLogin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
-    window.localStorage.setItem(AUTH_HINT_KEY, email);
+    safeStorageSet(AUTH_HINT_KEY, email);
     closeLoginModal();
     openAdminPanel();
     setSaveStatus(
@@ -465,27 +465,82 @@ async function submitLogin() {
 }
 
 async function openAdminPanel() {
-  const session = await getSession();
-  if (!session) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      openLoginModal();
+      return;
+    }
+    renderAdminEditor();
+    adminPanel.classList.remove("admin-panel--hidden");
+  } catch (error) {
     openLoginModal();
-    return;
+    setSaveStatus(
+      currentLanguage === "tr"
+        ? "Oturum kontrolünde sorun oluştu, lütfen tekrar giriş yapın."
+        : "Session check failed, please sign in again.",
+      "error"
+    );
   }
-  renderAdminEditor();
-  adminPanel.classList.remove("admin-panel--hidden");
 }
 
 async function handleAdminEntryClick() {
-  const session = await getSession();
-  if (session) {
-    openAdminPanel();
-    return;
-  }
   openLoginModal();
+  try {
+    const session = await getSession();
+    if (!session) {
+      return;
+    }
+    closeLoginModal();
+    renderAdminEditor();
+    adminPanel.classList.remove("admin-panel--hidden");
+  } catch (_error) {
+    loginError.textContent = currentLanguage === "tr"
+      ? "Giriş ekranı açıldı. Oturum kontrolü yapılamadıysa tekrar giriş yapabilirsiniz."
+      : "Login opened. If session check failed, you can sign in again.";
+    loginError.hidden = false;
+  }
 }
 
 function closeAdminPanel() {
   adminPanel.classList.add("admin-panel--hidden");
 }
+
+function safeStorageGet(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (_error) {
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (_error) {
+    return;
+  }
+}
+
+window.addEventListener("error", (event) => {
+  const message = event?.error?.message || event?.message || "Bilinmeyen JavaScript hatası.";
+  setSaveStatus(
+    currentLanguage === "tr"
+      ? `Arayüz hatası: ${message}`
+      : `Interface error: ${message}`,
+    "error"
+  );
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event?.reason?.message || String(event?.reason || "Unknown promise error.");
+  setSaveStatus(
+    currentLanguage === "tr"
+      ? `Arka plan hatası: ${reason}`
+      : `Background error: ${reason}`,
+    "error"
+  );
+});
 
 function addCategory() {
   const trTitle = window.prompt("Kategori adı (TR):");
