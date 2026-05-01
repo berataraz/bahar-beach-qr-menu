@@ -4,9 +4,9 @@ const MENU_ROW_ID = "primary";
 let state = null;
 let currentLanguage = "tr";
 let activeCategoryId = "";
-let saveTimeoutId = null;
 let saveInFlight = null;
 let startupError = "";
+let hasUnsavedChanges = false;
 
 const supabaseConfig = window.SUPABASE_CONFIG || {};
 const seedMenuData = window.SEED_MENU_DATA || null;
@@ -39,9 +39,9 @@ const adminPanel = document.getElementById("admin-panel");
 const loginModal = document.getElementById("login-modal");
 const loginError = document.getElementById("login-error");
 const saveStatus = document.getElementById("save-status");
+const saveMenuButton = document.getElementById("save-menu");
 const categorySelect = document.getElementById("category-select");
 const categoryEditor = document.getElementById("category-editor");
-const jsonTransfer = document.getElementById("json-transfer");
 const venuePhoneInput = document.getElementById("venue-phone");
 const venueNoteInput = document.getElementById("venue-note");
 const groupTemplate = document.getElementById("group-editor-template");
@@ -60,10 +60,7 @@ document.getElementById("submit-login").addEventListener("click", submitLogin);
 document.getElementById("close-admin").addEventListener("click", closeAdminPanel);
 document.getElementById("add-category").addEventListener("click", addCategory);
 document.getElementById("remove-category").addEventListener("click", removeCategory);
-document.getElementById("export-json").addEventListener("click", () => {
-  jsonTransfer.value = JSON.stringify(state, null, 2);
-});
-document.getElementById("import-json").addEventListener("click", importJson);
+document.getElementById("save-menu").addEventListener("click", saveMenuManually);
 document.getElementById("reset-data").addEventListener("click", resetData);
 
 categorySelect.addEventListener("change", (event) => {
@@ -131,6 +128,8 @@ async function init() {
           : "Menu loaded from Supabase.",
       "success"
     );
+    hasUnsavedChanges = false;
+    updateSaveButtonState();
   } catch (error) {
     menuContent.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
     setSaveStatus(error.message, "error");
@@ -142,6 +141,7 @@ function renderAll() {
   syncVenueInputs();
   renderMenu();
   renderAdminEditor();
+  updateSaveButtonState();
 }
 
 function syncStaticTexts() {
@@ -586,36 +586,37 @@ function removeCategory() {
   persistAndRender();
 }
 
-async function importJson() {
-  try {
-    const nextData = JSON.parse(jsonTransfer.value);
-    validateData(nextData);
-    state = nextData;
-    activeCategoryId = state.categories[0]?.id ?? "";
-    renderAll();
-    await saveMenuNow();
-  } catch (error) {
-    window.alert(`JSON okunamadı: ${error.message}`);
-  }
-}
-
 async function resetData() {
   try {
     const seed = getSeedData();
     state = seed;
     activeCategoryId = state.categories[0]?.id ?? "";
     renderAll();
-    await saveMenuNow();
+    hasUnsavedChanges = true;
+    updateSaveButtonState();
+    setSaveStatus(
+      currentLanguage === "tr"
+        ? "Varsayılan menü yüklendi. Kaydet'e basarak Supabase'e yazın."
+        : "Default menu loaded. Press Save to write it to Supabase.",
+      "saving"
+    );
   } catch (error) {
     setSaveStatus(error.message, "error");
   }
 }
 
 function persistAndRender(syncAdmin = true) {
+  hasUnsavedChanges = true;
   syncVenueInputs();
   renderMenu();
   if (syncAdmin) renderAdminEditor();
-  scheduleSave();
+  updateSaveButtonState();
+  setSaveStatus(
+    currentLanguage === "tr"
+      ? "Kaydedilmemiş değişiklikler var."
+      : "You have unsaved changes.",
+    "saving"
+  );
 }
 
 function refreshCategorySelectOptions() {
@@ -624,27 +625,6 @@ function refreshCategorySelectOptions() {
     if (!category) return;
     option.textContent = `${category.title.tr} / ${category.title.en}`;
   });
-}
-
-async function scheduleSave() {
-  const session = await getSession();
-  if (!session) {
-    setSaveStatus(
-      currentLanguage === "tr" ? "Kaydetmek için yönetici girişi gerekli." : "Admin login required to save.",
-      "error"
-    );
-    return;
-  }
-
-  setSaveStatus(
-    currentLanguage === "tr" ? "Değişiklikler Supabase'e kaydediliyor..." : "Saving changes to Supabase...",
-    "saving"
-  );
-
-  window.clearTimeout(saveTimeoutId);
-  saveTimeoutId = window.setTimeout(() => {
-    saveMenuNow().catch(() => {});
-  }, 500);
 }
 
 async function saveMenuNow() {
@@ -666,6 +646,8 @@ async function saveMenuNow() {
     .then(({ data, error }) => {
       if (error) throw error;
       state = data.data;
+      hasUnsavedChanges = false;
+      updateSaveButtonState();
       setSaveStatus(
         currentLanguage === "tr" ? "Değişiklikler Supabase'e kaydedildi." : "Changes saved to Supabase.",
         "success"
@@ -673,6 +655,7 @@ async function saveMenuNow() {
     })
     .catch((error) => {
       setSaveStatus(error.message, "error");
+      updateSaveButtonState();
       throw error;
     })
     .finally(() => {
@@ -680,6 +663,39 @@ async function saveMenuNow() {
     });
 
   return saveInFlight;
+}
+
+async function saveMenuManually() {
+  const session = await getSession();
+  if (!session) {
+    setSaveStatus(
+      currentLanguage === "tr" ? "Kaydetmek için yönetici girişi gerekli." : "Admin login required to save.",
+      "error"
+    );
+    openLoginModal();
+    return;
+  }
+
+  if (!hasUnsavedChanges) {
+    setSaveStatus(
+      currentLanguage === "tr" ? "Kaydedilecek yeni değişiklik yok." : "There are no new changes to save.",
+      "success"
+    );
+    updateSaveButtonState();
+    return;
+  }
+
+  setSaveStatus(
+    currentLanguage === "tr" ? "Değişiklikler Supabase'e kaydediliyor..." : "Saving changes to Supabase...",
+    "saving"
+  );
+  updateSaveButtonState(true);
+
+  try {
+    await saveMenuNow();
+  } finally {
+    updateSaveButtonState();
+  }
 }
 
 async function fetchMenu() {
@@ -765,6 +781,18 @@ function setSaveStatus(message, tone = "") {
   if (tone === "saving") saveStatus.classList.add("is-saving");
   if (tone === "success") saveStatus.classList.add("is-success");
   if (tone === "error") saveStatus.classList.add("is-error");
+}
+
+function updateSaveButtonState(forceBusy = false) {
+  const busy = forceBusy || Boolean(saveInFlight);
+  saveMenuButton.disabled = busy;
+  if (busy) {
+    saveMenuButton.textContent = currentLanguage === "tr" ? "Kaydediliyor..." : "Saving...";
+    return;
+  }
+  saveMenuButton.textContent = hasUnsavedChanges
+    ? currentLanguage === "tr" ? "Kaydet" : "Save"
+    : currentLanguage === "tr" ? "Kaydedildi" : "Saved";
 }
 
 function validateData(data) {
