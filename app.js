@@ -6,9 +6,11 @@ let currentLanguage = "tr";
 let activeCategoryId = "";
 let saveTimeoutId = null;
 let saveInFlight = null;
+let startupError = "";
 
 const supabaseConfig = window.SUPABASE_CONFIG || {};
-const supabaseReady = Boolean(
+const seedMenuData = window.SEED_MENU_DATA || null;
+const hasSupabaseConfig = Boolean(
   window.supabase &&
     supabaseConfig.url &&
     supabaseConfig.anonKey &&
@@ -16,9 +18,14 @@ const supabaseReady = Boolean(
     !supabaseConfig.anonKey.includes("YOUR_SUPABASE_ANON_KEY")
 );
 
-const supabase = supabaseReady
-  ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
-  : null;
+let supabase = null;
+if (hasSupabaseConfig) {
+  try {
+    supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey);
+  } catch (error) {
+    startupError = error?.message || "Supabase client could not be created.";
+  }
+}
 
 const heroTagline = document.getElementById("hero-tagline");
 const heroTitle = document.querySelector(".hero h1");
@@ -80,14 +87,14 @@ init();
 async function init() {
   syncStaticTexts();
 
-  if (!supabaseReady) {
-    menuContent.innerHTML = `<div class="empty-state">${currentLanguage === "tr"
-      ? "Supabase ayarlarını tamamlamanız gerekiyor."
-      : "You need to complete your Supabase configuration."}</div>`;
+  if (!supabase) {
+    state = getSeedData();
+    activeCategoryId = state?.categories?.[0]?.id ?? "";
+    renderAll();
     setSaveStatus(
       currentLanguage === "tr"
-        ? "Supabase yapılandırması eksik. `supabase-config.js` dosyasını doldurun."
-        : "Supabase config is missing. Fill in `supabase-config.js`.",
+        ? startupError || "Supabase yapılandırması eksik. `supabase-config.js` dosyasını doldurun."
+        : startupError || "Supabase config is missing. Fill in `supabase-config.js`.",
       "error"
     );
     return;
@@ -521,9 +528,7 @@ async function importJson() {
 
 async function resetData() {
   try {
-    const response = await fetch("./seed_data.json");
-    const seed = await response.json();
-    validateData(seed);
+    const seed = getSeedData();
     state = seed;
     activeCategoryId = state.categories[0]?.id ?? "";
     renderAll();
@@ -597,7 +602,10 @@ async function saveMenuNow() {
 }
 
 async function fetchMenu() {
-  if (!supabase) throw new Error("Supabase client not configured.");
+  if (!supabase) {
+    if (seedMenuData) return seedMenuData;
+    throw new Error("Supabase client not configured.");
+  }
 
   const { data, error } = await supabase
     .from("menu_content")
@@ -606,7 +614,7 @@ async function fetchMenu() {
     .single();
 
   if (error || !data?.data) {
-    const seed = await fetchSeedData();
+    const seed = getSeedData();
     setSaveStatus(
       currentLanguage === "tr"
         ? "Supabase verisi bulunamadı. Geçici olarak seed veri gösteriliyor."
@@ -620,18 +628,16 @@ async function fetchMenu() {
   return data.data;
 }
 
-async function fetchSeedData() {
-  const response = await fetch("./seed_data.json");
-  if (!response.ok) {
+function getSeedData() {
+  if (!seedMenuData) {
     throw new Error(
       currentLanguage === "tr"
         ? "Ne Supabase verisi ne de seed veri okunabildi."
         : "Neither Supabase data nor seed data could be loaded."
     );
   }
-  const seed = await response.json();
-  validateData(seed);
-  return seed;
+  validateData(seedMenuData);
+  return JSON.parse(JSON.stringify(seedMenuData));
 }
 
 async function getSession() {
