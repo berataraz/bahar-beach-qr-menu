@@ -314,19 +314,24 @@ function renderAdminEditor() {
 
   metaCard.querySelector(".category-title-tr").addEventListener("input", (event) => {
     activeCategory.title.tr = event.target.value;
-    persistAndRender(false);
+    renderMenu();
+    refreshCategorySelectOptions();
+    scheduleSave();
   });
   metaCard.querySelector(".category-title-en").addEventListener("input", (event) => {
     activeCategory.title.en = event.target.value;
-    persistAndRender(false);
+    refreshCategorySelectOptions();
+    scheduleSave();
   });
   metaCard.querySelector(".category-description-tr").addEventListener("input", (event) => {
     activeCategory.description.tr = event.target.value;
-    persistAndRender(false);
+    renderMenu();
+    scheduleSave();
   });
   metaCard.querySelector(".category-description-en").addEventListener("input", (event) => {
     activeCategory.description.en = event.target.value;
-    persistAndRender(false);
+    if (currentLanguage === "en") renderMenu();
+    scheduleSave();
   });
   metaCard.querySelector(".add-group").addEventListener("click", () => {
     activeCategory.groups.push(createGroup({ tr: "Yeni Grup", en: "New Group" }, []));
@@ -343,11 +348,15 @@ function renderAdminEditor() {
 
     groupNode.querySelector(".group-title-tr").addEventListener("input", (event) => {
       group.title.tr = event.target.value;
-      persistAndRender();
+      groupNode.querySelector(".editor-card__title").textContent = `${groupIndex + 1}. ${group.title.tr} / ${group.title.en}`;
+      renderMenu();
+      scheduleSave();
     });
     groupNode.querySelector(".group-title-en").addEventListener("input", (event) => {
       group.title.en = event.target.value;
-      persistAndRender();
+      groupNode.querySelector(".editor-card__title").textContent = `${groupIndex + 1}. ${group.title.tr} / ${group.title.en}`;
+      if (currentLanguage === "en") renderMenu();
+      scheduleSave();
     });
     groupNode.querySelector(".remove-group").addEventListener("click", () => {
       activeCategory.groups.splice(groupIndex, 1);
@@ -372,31 +381,40 @@ function renderAdminEditor() {
 
       itemNode.querySelector(".item-name-tr").addEventListener("input", (event) => {
         menuItem.name.tr = event.target.value;
-        persistAndRender();
+        itemNode.querySelector(".editor-card__title").textContent = `${itemIndex + 1}. ${menuItem.name.tr} / ${menuItem.name.en}`;
+        renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-name-en").addEventListener("input", (event) => {
         menuItem.name.en = event.target.value;
-        persistAndRender();
+        itemNode.querySelector(".editor-card__title").textContent = `${itemIndex + 1}. ${menuItem.name.tr} / ${menuItem.name.en}`;
+        if (currentLanguage === "en") renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-description-tr").addEventListener("input", (event) => {
         menuItem.description.tr = event.target.value;
-        persistAndRender(false);
+        renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-description-en").addEventListener("input", (event) => {
         menuItem.description.en = event.target.value;
-        persistAndRender(false);
+        if (currentLanguage === "en") renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-price").addEventListener("input", (event) => {
         menuItem.price = event.target.value;
-        persistAndRender(false);
+        renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-badge").addEventListener("input", (event) => {
         menuItem.badge = event.target.value;
-        persistAndRender(false);
+        renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-image").addEventListener("input", (event) => {
         menuItem.image = event.target.value;
-        persistAndRender(false);
+        renderMenu();
+        scheduleSave();
       });
       itemNode.querySelector(".item-file").addEventListener("change", async (event) => {
         const file = event.target.files?.[0];
@@ -598,6 +616,14 @@ function persistAndRender(syncAdmin = true) {
   renderMenu();
   if (syncAdmin) renderAdminEditor();
   scheduleSave();
+}
+
+function refreshCategorySelectOptions() {
+  [...categorySelect.options].forEach((option) => {
+    const category = state.categories.find((entry) => entry.id === option.value);
+    if (!category) return;
+    option.textContent = `${category.title.tr} / ${category.title.en}`;
+  });
 }
 
 async function scheduleSave() {
